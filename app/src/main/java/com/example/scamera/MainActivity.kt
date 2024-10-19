@@ -17,6 +17,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.FallbackStrategy
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
@@ -179,13 +180,14 @@ class MainActivity : AppCompatActivity() {
                 }
 
             val recorder = Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                .setQualitySelector(QualitySelector.from(Quality.HIGHEST,
+                    FallbackStrategy.higherQualityOrLowerThan(Quality.SD)))
                 .build()
             videoCapture = VideoCapture.withOutput(recorder)
 
-            /*
-            imageCapture = ImageCapture.Builder().build()
 
+            imageCapture = ImageCapture.Builder().build()
+            /*
             val imageAnalyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
@@ -193,14 +195,15 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "Average luminosity: $luma")
                     })
                 }
-            */
+        */
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
                 cameraProvider.unbindAll()
 
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, videoCapture)
+                    this, cameraSelector, preview, imageCapture, videoCapture)
+
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
